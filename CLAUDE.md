@@ -40,6 +40,7 @@ Nazivi (vrijednosti nikad u git — idu u `.env.local` lokalno i u Vercel dashbo
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (samo server, i to tek ako zatreba — nikad izložen klijentu)
+- `ALLOWED_EMAILS` (samo server) — zarezom odvojena lista dopuštenih Google emailova; provjerava se u `app/auth/callback/route.ts` kao dodatna zaštita uz Supabase dashboard postavku "Allow new users to sign up"
 
 ## Konvencije koda
 - TypeScript strict; izbjegavati `any`.

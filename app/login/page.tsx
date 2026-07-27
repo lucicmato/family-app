@@ -16,7 +16,13 @@ export default async function LoginPage({
         Prijavi se da vidiš zajedničke zadatke.
       </p>
 
-      {error && (
+      {error === "not_allowed" && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40">
+          Ovaj Google račun nema pristup aplikaciji.
+        </p>
+      )}
+
+      {error && error !== "not_allowed" && (
         <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40">
           Prijava nije uspjela. Pokušaj ponovno.
         </p>
