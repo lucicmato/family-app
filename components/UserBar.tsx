@@ -2,7 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { signOut } from "@/app/actions/auth";
 
 // Shows the logged-in user + sign-out. Rendered as an async Server Component.
-export async function UserBar() {
+export const UserBar = async () => {
   const user = await getCurrentUser();
   if (!user) {
     return null;
@@ -21,4 +21,4 @@ export async function UserBar() {
       </form>
     </div>
   );
-}
+};

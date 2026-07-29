@@ -5,7 +5,7 @@ const PUBLIC_PATHS = ["/login", "/auth/callback"];
 
 // Refresh Supabase session cookies on every request and protect all routes
 // except login/callback — no public registration, only the two signed-in users.
-export async function updateSession(request: NextRequest) {
+export const updateSession = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -50,4 +50,4 @@ export async function updateSession(request: NextRequest) {
   }
 
   return supabaseResponse;
-}
+};

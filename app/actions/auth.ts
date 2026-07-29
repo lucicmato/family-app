@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 // Google OAuth and redirect the user to Google's consent screen.
-export async function signInWithGoogle(): Promise<never> {
+export const signInWithGoogle = async (): Promise<never> => {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -21,11 +21,11 @@ export async function signInWithGoogle(): Promise<never> {
   }
 
   redirect(data.url);
-}
+};
 
 // Sign out.
-export async function signOut(): Promise<never> {
+export const signOut = async (): Promise<never> => {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
-}
+};

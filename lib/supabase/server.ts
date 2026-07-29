@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 // Supabase client for the server (Server Components, Server Actions).
 // cookies() is async in Next.js 16, which is why this is an async function too.
-export async function createClient() {
+export const createClient = async () => {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -27,4 +27,4 @@ export async function createClient() {
       },
     },
   );
-}
+};

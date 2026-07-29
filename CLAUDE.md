@@ -31,6 +31,7 @@ Tablica `tasks`:
 - `done` (boolean)
 - `created_by`, `assigned_to` (opcionalno)
 - `due_date` (opcionalno)
+- `priority` (1 = visok, 2 = srednji, 3 = nizak; default 2)
 - `created_at`, `updated_at`
 
 Dijeljeni popis — oba korisnika vide i mijenjaju sve taskove. Real-time sync preko Supabase subscriptiona: kad jedan korisnik doda ili promijeni task, drugi ga vidi bez refresha.
@@ -47,6 +48,7 @@ Nazivi (vrijednosti nikad u git — idu u `.env.local` lokalno i u Vercel dashbo
 - Server Components po defaultu; `"use client"` samo gdje treba interaktivnost.
 - Named exports (default export samo gdje Next.js to traži, npr. stranice).
 - `async/await`, ne lanci `.then()`.
+- Funkcije pisati kao arrow function expressione (`const f = () => {}`) svugdje gdje ima smisla; `function` deklaracije samo gdje su nužne (npr. Next.js stranice/layouti/route handleri koji traže named function export).
 - Svaka mutacija (Server Action) vraća jasan rezultat i hvata greške; ne gutati greške tiho.
 - Komentari i objašnjenja mogu biti na hrvatskom.
 
