@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ToastProvider } from "@/components/Toast";
+import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,6 +17,19 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Obiteljska aplikacija",
   description: "Aplikacija obitelji Lučić",
+  // iOS Safari koristi ovo za ikonu na početnom ekranu i standalone prikaz.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Obitelj",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#18181b",
 };
 
 export default function RootLayout({
@@ -30,6 +44,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ToastProvider>{children}</ToastProvider>
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );
