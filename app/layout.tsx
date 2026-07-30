@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Obiteljska aplikacija",
   description: "Aplikacija obitelji Lučić",
-  // iOS Safari koristi ovo za ikonu na početnom ekranu i standalone prikaz.
+  // iOS Safari uses this for the home screen icon and standalone display.
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
