@@ -25,3 +25,16 @@ export type FamilyMember = {
   email: string;
   label: string;
 };
+
+// Type matching the `shopping_items` table in Supabase.
+export type ShoppingItem = {
+  id: string;
+  name: string;
+  note: string | null;
+  done: boolean;
+  created_by: string | null;
+  checked_by: string | null;
+  checked_at: string | null;
+  created_at: string;
+  updated_at: string;
+};

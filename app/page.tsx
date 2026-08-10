@@ -9,6 +9,12 @@ const FEATURES = [
     description: "Zajednički popis svakodnevnih zadataka.",
     icon: "✅",
   },
+  {
+    href: "/shopping",
+    title: "Popis za kupovinu",
+    description: "Zajednički popis za kupovinu.",
+    icon: "🛒",
+  },
 ] as const;
 
 export default function Home() {
