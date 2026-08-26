@@ -30,11 +30,22 @@ export const NotificationsToggle = () => {
   // On startup, determine whether push is supported and whether this device is already subscribed.
   useEffect(() => {
     const init = async () => {
+      // A missing key is a deploy misconfiguration, not an unsupported browser.
+      // NEXT_PUBLIC_* is inlined at build time, so an env var absent on the
+      // deploy target has no symptom other than this button vanishing. Nothing
+      // the user can act on, so it goes to the console, not the UI.
+      if (!PUBLIC_KEY) {
+        console.error(
+          "NotificationsToggle: NEXT_PUBLIC_VAPID_PUBLIC_KEY is missing from this build — push is unavailable.",
+        );
+        setState("unsupported");
+        return;
+      }
+
       const supported =
         "serviceWorker" in navigator &&
         "PushManager" in window &&
-        "Notification" in window &&
-        !!PUBLIC_KEY;
+        "Notification" in window;
 
       if (!supported) {
         setState("unsupported");
@@ -50,7 +61,10 @@ export const NotificationsToggle = () => {
       setState(existing ? "on" : "off");
     };
 
-    init().catch(() => setState("unsupported"));
+    init().catch((error) => {
+      console.error("NotificationsToggle: init failed:", error);
+      setState("unsupported");
+    });
   }, []);
 
   const enable = async () => {
