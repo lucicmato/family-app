@@ -1,3 +1,6 @@
+> Production-ready personal PWA built with modern Next.js practices.  
+> Demonstrates planning, architecture decisions, Server Components, RLS, and real push notifications - not a tutorial demo.
+
 # Family App
 
 A private PWA for shared daily tasks and a shopping list, built for **exactly two users** (me and my wife). No public registration, no onboarding, no settings nobody touches.
@@ -8,13 +11,13 @@ The guiding principle for the whole project: **simplicity matters more than feat
 
 ## Contents
 
-- [Planning](#planning) — why this set of decisions
-- [Tech stack](#tech-stack) — what and why
-- [Architecture](#architecture) — how data flows
+- [Planning](#planning) - why this set of decisions
+- [Tech stack](#tech-stack) - what and why
+- [Architecture](#architecture) - how data flows
 - [Data model](#data-model)
-- [Auth](#auth) — Google OAuth + allowlist
+- [Auth](#auth) - Google OAuth + allowlist
 - [PWA and push notifications](#pwa-and-push-notifications)
-- [Execution](#execution) — timeline and status
+- [Execution](#execution) - timeline and status
 - [Running locally](#running-locally)
 - [Deployment](#deployment)
 - [Known limitations](#known-limitations)
@@ -27,7 +30,7 @@ The guiding principle for the whole project: **simplicity matters more than feat
 
 | Constraint | Consequence in the architecture |
 |---|---|
-| Exactly 2 users, both trusted | No organizations, teams, invite flows, or roles. Data is **not** partitioned per user — only an "assigned to" field. |
+| Exactly 2 users, both trusted | No organizations, teams, invite flows, or roles. Data is **not** partitioned per user - only an "assigned to" field. |
 | Solo development, limited time | Managed services instead of self-run infrastructure. Zero DevOps. |
 | Must work on mobile | Mobile-first UI, PWA instead of a native app (no app stores, no second codebase). |
 | Deployment is routine from day one | Vercel + auto-deploy from `master`. Never "we'll deploy at the end". |
@@ -36,16 +39,16 @@ The guiding principle for the whole project: **simplicity matters more than feat
 ### Key decisions and rationale
 
 **Why Next.js App Router, not an SPA + separate backend**
-Server Components mean 90% of the app ships no client JavaScript. Server Actions remove an entire layer of REST endpoints — a mutation is a function the component calls directly, and authorization runs on the server where it belongs. For a two-user app that's the fewest moving parts.
+Server Components mean 90% of the app ships no client JavaScript. Server Actions remove an entire layer of REST endpoints - a mutation is a function the component calls directly, and authorization runs on the server where it belongs. For a two-user app that's the fewest moving parts.
 
 **Why Supabase, not self-hosted Postgres + auth**
-One service covers the database, authentication, Row Level Security, and (later) real-time. The alternative would be Postgres + NextAuth + hosting + migrations — several times the work for an identical result.
+One service covers the database, authentication, Row Level Security, and (later) real-time. The alternative would be Postgres + NextAuth + hosting + migrations - several times the work for an identical result.
 
 **Why Server Actions instead of API routes**
-Less code, types flow from the database to the component without a hand-written `fetch`/`JSON.parse` layer, and there is no URL for anyone to guess. The one exception is `app/auth/callback/route.ts` — an OAuth redirect **must** be a real HTTP route.
+Less code, types flow from the database to the component without a hand-written `fetch`/`JSON.parse` layer, and there is no URL for anyone to guess. The one exception is `app/auth/callback/route.ts` - an OAuth redirect **must** be a real HTTP route.
 
 **Why a PWA, not React Native**
-"Add to Home Screen" gives an icon on the home screen, standalone display, and push notifications — practically everything needed. The cost is zero: same codebase, same deployment.
+"Add to Home Screen" gives an icon on the home screen, standalone display, and push notifications - practically everything needed. The cost is zero: same codebase, same deployment.
 
 **Why Google login, not passwords**
 No password management, no reset-password flow, no risk of leaked hashes. Both users already have a Google account.
@@ -63,20 +66,20 @@ Styling stays in the component you're looking at. No second file, no inventing c
 | UI | [React](https://react.dev) | `19.2.4` | Server + Client Components |
 | Language | [TypeScript](https://www.typescriptlang.org) | `^5` | `strict: true`, no `any` |
 | Styling | [Tailwind CSS](https://tailwindcss.com) | `^4` | CSS-first config (`@theme inline`), no `tailwind.config.js` |
-| Database | [Supabase](https://supabase.com) Postgres | — | Data + Row Level Security |
-| Auth | Supabase Auth (Google OAuth) | — | Session in httpOnly cookies |
+| Database | [Supabase](https://supabase.com) Postgres | - | Data + Row Level Security |
+| Auth | Supabase Auth (Google OAuth) | - | Session in httpOnly cookies |
 | Supabase SDK | `@supabase/ssr` + `@supabase/supabase-js` | `0.12.3` / `2.110.8` | Cookie-aware clients for SSR |
 | Push | [`web-push`](https://github.com/web-push-libs/web-push) | `3.6.7` | VAPID signing + payload encryption |
-| Fonts | `next/font` (Geist, Geist Mono) | — | Self-hosted, no layout shift |
-| Lint | ESLint 9 + `eslint-config-next` | — | Flat config (`eslint.config.mjs`) |
-| Hosting | [Vercel](https://vercel.com) | — | Auto-deploy from `master` |
-| Packages | npm | — | |
+| Fonts | `next/font` (Geist, Geist Mono) | - | Self-hosted, no layout shift |
+| Lint | ESLint 9 + `eslint-config-next` | - | Flat config (`eslint.config.mjs`) |
+| Hosting | [Vercel](https://vercel.com) | - | Auto-deploy from `master` |
+| Packages | npm | - | |
 
 **Deliberately *absent*:**
 
-- **State management** (Redux, Zustand, TanStack Query) — the server is the source of truth and `revalidatePath` is the cache invalidation. Client state is just `useState` for forms and toggles.
-- **An ORM** (Prisma, Drizzle) — the Supabase client is enough for four tables; schemas live in the Supabase dashboard.
-- **A UI component library** — `shadcn/ui` is planned, but for now every component is hand-written with Tailwind. It goes in once the UI grows enough to earn it.
+- **State management** (Redux, Zustand, TanStack Query) - the server is the source of truth and `revalidatePath` is the cache invalidation. Client state is just `useState` for forms and toggles.
+- **An ORM** (Prisma, Drizzle) - the Supabase client is enough for four tables; schemas live in the Supabase dashboard.
+- **A UI component library** - `shadcn/ui` is planned, but for now every component is hand-written with Tailwind. It goes in once the UI grows enough to earn it.
 ---
 
 ## Architecture
@@ -92,34 +95,34 @@ family-app/
 │   ├── tasks/page.tsx          # Task list + filters
 │   ├── shopping/page.tsx       # Shopping list
 │   ├── auth/callback/route.ts  # OAuth code → session + allowlist check
-│   └── actions/                # Server Actions — ALL mutations
+│   └── actions/                # Server Actions - ALL mutations
 │       ├── auth.ts             #   sign in / sign out
 │       ├── tasks.ts            #   fetch, add, toggle, assign, delete
 │       ├── shopping.ts         #   shopping list
 │       └── push.ts             #   register / remove subscription
 ├── components/                 # Presentation (Server where possible, Client where required)
 ├── lib/
-│   ├── supabase/               # Four clients — see table below
+│   ├── supabase/               # Four clients - see table below
 │   ├── auth.ts                 # getCurrentUser(), cache()-d per request
 │   ├── family.ts               # getFamilyMembers(), isValidAssignee()
 │   ├── types.ts                # ActionResult, Task, ShoppingItem, FamilyMember
-│   ├── push.ts                 # sendPushToUser() — VAPID + web-push
+│   ├── push.ts                 # sendPushToUser() - VAPID + web-push
 │   ├── priority.ts             # priority 1/2/3 → label and color
 │   └── helperFunctions.ts      # date formatting
 ├── public/sw.js                # Hand-written service worker
 └── proxy.ts                    # Next.js 16 middleware (session refresh + route protection)
 ```
 
-### Four Supabase clients — and why they differ
+### Four Supabase clients - and why they differ
 
 This is the most important part of the architecture to understand. Same SDK, four contexts:
 
 | File | Key | Identity | Used in |
 |---|---|---|---|
-| `lib/supabase/server.ts` | `anon` | signed-in user (from cookie) | Server Components, Server Actions — **the main path** |
+| `lib/supabase/server.ts` | `anon` | signed-in user (from cookie) | Server Components, Server Actions - **the main path** |
 | `lib/supabase/middleware.ts` | `anon` | signed-in user | `proxy.ts`, refreshing session cookies |
-| `lib/supabase/client.ts` | `anon` | signed-in user | browser (`"use client"`) — prepared for Realtime, currently unused |
-| `lib/supabase/admin.ts` | `service_role` | **nobody** — bypasses RLS | exclusively `lib/push.ts` |
+| `lib/supabase/client.ts` | `anon` | signed-in user | browser (`"use client"`) - prepared for Realtime, currently unused |
+| `lib/supabase/admin.ts` | `service_role` | **nobody** - bypasses RLS | exclusively `lib/push.ts` |
 
 RLS on every table means the `anon` client sees exactly what the policies allow. `admin.ts` exists only because sending a notification **by definition** crosses a user boundary: when I assign a task to my wife, my Server Action has to read *her* push subscriptions, and a `user_id = auth.uid()` policy blocks that.
 
@@ -136,7 +139,7 @@ sequenceDiagram
     participant DB as Supabase (RLS)
 
     B->>P: GET /tasks
-    P->>DB: auth.getUser() — refresh session
+    P->>DB: auth.getUser() - refresh session
     alt no session
         P-->>B: redirect /login
     end
@@ -155,11 +158,11 @@ sequenceDiagram
 ### Code conventions
 
 - **Server Components by default**; `"use client"` only where interactivity is required (`AddTaskForm`, `TaskItem`, `NotificationsToggle`, `Toast`).
-- **Named exports** — `export const`. Default exports only where Next.js demands them (pages, layouts).
+- **Named exports** - `export const`. Default exports only where Next.js demands them (pages, layouts).
 - **Arrow function expressions** (`const f = () => {}`) throughout; `function` declarations only for Next.js pages and route handlers.
-- **Every mutation returns `ActionResult`** (`{ ok: true } | { ok: false, error: string }`) — errors are never silently swallowed, the UI surfaces them through a toast.
-- **React's `cache()`** on `getCurrentUser` and `getFamilyMembers` — if both the page and `UserBar` call the same thing in one render, the query hits the database once.
-- **`Promise.all`** for independent fetches (`app/tasks/page.tsx:16`) — no serial waterfalls.
+- **Every mutation returns `ActionResult`** (`{ ok: true } | { ok: false, error: string }`) - errors are never silently swallowed, the UI surfaces them through a toast.
+- **React's `cache()`** on `getCurrentUser` and `getFamilyMembers` - if both the page and `UserBar` call the same thing in one render, the query hits the database once.
+- **`Promise.all`** for independent fetches (`app/tasks/page.tsx:16`) - no serial waterfalls.
 - Comments are in English; UI copy is in Croatian.
 
 ---
@@ -168,7 +171,7 @@ sequenceDiagram
 
 Four tables, all with Row Level Security enabled.
 
-**`tasks`** — a shared list; both users see and modify everything
+**`tasks`** - a shared list; both users see and modify everything
 | Column | Type | Note |
 |---|---|---|
 | `id` | uuid | PK |
@@ -181,20 +184,20 @@ Four tables, all with Row Level Security enabled.
 | `priority` | int | 1 = high, 2 = medium (default), 3 = low |
 | `created_at` / `updated_at` | timestamptz | |
 
-**`profiles`** — one row per user, created on first sign-in
+**`profiles`** - one row per user, created on first sign-in
 `id` (= `auth.users.id`), `email`, `user_name`, `created_at`
 
-**`shopping_items`** — shared shopping list
+**`shopping_items`** - shared shopping list
 `id`, `name`, `note?`, `done`, `created_by?`, `checked_by?`, `checked_at?`, `created_at`, `updated_at`
 
-**`push_subscriptions`** — one row per **device**, not per user
+**`push_subscriptions`** - one row per **device**, not per user
 `id`, `user_id`, `endpoint` (unique), `p256dh`, `auth`
 
-The TypeScript types mirroring these tables live in `lib/types.ts` and are hand-written (no codegen from the schema — not worth it for four tables).
+The TypeScript types mirroring these tables live in `lib/types.ts` and are hand-written (no codegen from the schema - not worth it for four tables).
 
 ### Task ordering
 
-Defined in `getTasks()` (`app/actions/tasks.ts:36`) — all in a single query, no sorting in JS:
+Defined in `getTasks()` (`app/actions/tasks.ts:36`) - all in a single query, no sorting in JS:
 
 1. open before done (`done ASC`)
 2. nearest due date first, no due date last (`due_date ASC NULLS LAST`)
@@ -208,7 +211,7 @@ Defined in `getTasks()` (`app/actions/tasks.ts:36`) — all in a single query, n
 Passwordless Google OAuth, with **two independent layers** of access restriction:
 
 1. Supabase dashboard: *Allow new users to sign up* = **off**
-2. `ALLOWED_EMAILS` check in `app/auth/callback/route.ts` — defense in depth, so a lapse in the first layer doesn't open the app
+2. `ALLOWED_EMAILS` check in `app/auth/callback/route.ts` - defense in depth, so a lapse in the first layer doesn't open the app
 
 ```mermaid
 sequenceDiagram
@@ -244,8 +247,8 @@ The session lives in httpOnly cookies (unreachable from JavaScript). `proxy.ts` 
 
 - `app/manifest.ts` generates `/manifest.webmanifest` through Next.js `MetadataRoute.Manifest` (typed, no hand-written JSON)
 - Icons: 192, 512, and maskable 512 + `apple-touch-icon.png`
-- `appleWebApp` metadata in `layout.tsx` — without it iOS won't render standalone mode
-- `public/sw.js` — a hand-written service worker, not generated:
+- `appleWebApp` metadata in `layout.tsx` - without it iOS won't render standalone mode
+- `public/sw.js` - a hand-written service worker, not generated:
   - **network-first** for same-origin GETs → fresh data with a cache fallback when offline
   - Supabase calls and POST mutations are **never** cached
   - `skipWaiting()` + `clients.claim()` → a new deployment takes control immediately
@@ -268,7 +271,7 @@ sequenceDiagram
     SA->>DB: upsert onConflict: endpoint
 
     Note over SA: Sending
-    SA->>DB: SELECT (admin client — bypasses RLS)
+    SA->>DB: SELECT (admin client - bypasses RLS)
     SA->>PS: web-push, VAPID signature + encrypted payload
     PS->>SW: push event
     SW->>D: showNotification()
@@ -278,13 +281,13 @@ sequenceDiagram
 
 Design decisions:
 
-- **`sendPushToUser` never throws.** A notification is best-effort — if the push service doesn't respond, adding the task must still succeed. Errors are logged, not propagated.
-- **The `await` is nonetheless required** (`app/actions/tasks.ts:91`) — without it the Vercel serverless function exits before the push goes out.
-- **No self-notification** — guarded by `assignedTo !== user.id`.
-- **Self-cleaning** — `404`/`410` means the subscription no longer exists (the user turned notifications off or removed the app) → the row is deleted.
+- **`sendPushToUser` never throws.** A notification is best-effort - if the push service doesn't respond, adding the task must still succeed. Errors are logged, not propagated.
+- **The `await` is nonetheless required** (`app/actions/tasks.ts:91`) - without it the Vercel serverless function exits before the push goes out.
+- **No self-notification** - guarded by `assignedTo !== user.id`.
+- **Self-cleaning** - `404`/`410` means the subscription no longer exists (the user turned notifications off or removed the app) → the row is deleted.
 - **Permission is requested on click only**, never automatically on load. A browser requirement, especially on iOS.
 
-> **iOS:** Web push works **only** if the app is installed to the home screen. In a regular Safari tab it doesn't exist — no error, just silence.
+> **iOS:** Web push works **only** if the app is installed to the home screen. In a regular Safari tab it doesn't exist - no error, just silence.
 
 ---
 
@@ -305,12 +308,12 @@ Development went incrementally: every step is a self-contained, deployed feature
 
 ### Roadmap status
 
-- [x] **MVP** — add a task, list tasks, mark as done
-- [x] **Due date and assignment** — `due_date`, `assigned_to`, priority 1–3
-- [x] **PWA** — install to mobile, offline app shell
-- [x] **Shopping list** — a second feature (outside the original roadmap, but the same shape)
-- [x] **Push notifications** — planned for "later", shipped early
-- [ ] **Real-time sync** — `lib/supabase/client.ts` is prepared, but the Supabase Realtime subscription isn't written yet. Refreshing currently goes through `revalidatePath` after a mutation: the other user's change shows up on navigation, not instantly.
+- [x] **MVP** - add a task, list tasks, mark as done
+- [x] **Due date and assignment** - `due_date`, `assigned_to`, priority 1–3
+- [x] **PWA** - install to mobile, offline app shell
+- [x] **Shopping list** - a second feature (outside the original roadmap, but the same shape)
+- [x] **Push notifications** - planned for "later", shipped early
+- [ ] **Real-time sync** - `lib/supabase/client.ts` is prepared, but the Supabase Realtime subscription isn't written yet. Refreshing currently goes through `revalidatePath` after a mutation: the other user's change shows up on navigation, not instantly.
 - [ ] **Categories** (house, groceries, kids…)
 
 ### Definition of done
@@ -336,18 +339,18 @@ npm run dev                  # http://localhost:3000
 
 ### Environment variables
 
-Values **never** go into git — locally in `.env.local`, in production in the Vercel dashboard.
+Values **never** go into git - locally in `.env.local`, in production in the Vercel dashboard.
 
 | Variable | Visibility | Purpose |
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | public | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | public | Client key — RLS constrains it |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | public | Client key - RLS constrains it |
 | `ALLOWED_EMAILS` | **server** | Comma-separated allowed Google emails |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | public | Identifies the server to the push service |
 | `VAPID_PRIVATE_KEY` | **server** | Signs push requests |
-| `SUPABASE_SERVICE_ROLE_KEY` | **server** | Bypasses RLS — see the warning above |
+| `SUPABASE_SERVICE_ROLE_KEY` | **server** | Bypasses RLS - see the warning above |
 
-Next.js inlines **only** variables with the `NEXT_PUBLIC_` prefix into the browser bundle. That prefix is the single thing keeping the `service_role` key out of the client — it isn't cosmetic.
+Next.js inlines **only** variables with the `NEXT_PUBLIC_` prefix into the browser bundle. That prefix is the single thing keeping the `service_role` key out of the client - it isn't cosmetic.
 
 The VAPID pair is generated once:
 
@@ -390,9 +393,9 @@ Deliberate trade-offs and things awaiting a fix:
 
 **Realtime isn't implemented.** Roadmap step 3. State currently refreshes through `revalidatePath` after a mutation, which means the other user's change appears on navigation rather than instantly. `lib/supabase/client.ts` exists for exactly this purpose and has no consumer yet.
 
-**`admin.ts` could probably be removed.** The `service_role` key exists only because the `push_subscriptions` policy is per-user. In an app with two trusted users who already share all data, a `to authenticated using (true)` policy for `SELECT`/`DELETE` on that table would make the admin client unnecessary — and remove the most dangerous key from the system. `INSERT`/`UPDATE` would stay strict (`user_id = auth.uid()`).
+**`admin.ts` could probably be removed.** The `service_role` key exists only because the `push_subscriptions` policy is per-user. In an app with two trusted users who already share all data, a `to authenticated using (true)` policy for `SELECT`/`DELETE` on that table would make the admin client unnecessary - and remove the most dangerous key from the system. `INSERT`/`UPDATE` would stay strict (`user_id = auth.uid()`).
 
-**No `server-only` guard.** Nothing mechanically prevents `lib/supabase/admin.ts` from ending up in the client bundle — it's protected only by the convention that `lib/push.ts` is its sole caller. A single `import "server-only"` would turn that into a build-time guarantee.
+**No `server-only` guard.** Nothing mechanically prevents `lib/supabase/admin.ts` from ending up in the client bundle - it's protected only by the convention that `lib/push.ts` is its sole caller. A single `import "server-only"` would turn that into a build-time guarantee.
 
 **`pushsubscriptionchange` isn't handled.** When the browser revokes a subscription on its own, the row stays dead in the database until a send returns 404/410. In the meantime the user believes notifications are working.
 
