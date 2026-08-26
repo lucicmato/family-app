@@ -44,3 +44,43 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(request).then((cached) => cached ?? caches.match("/"))),
   );
 });
+
+// A push notification arrived — show it. Payload is JSON from sendPushToUser.
+self.addEventListener("push", (event) => {
+  let data = { title: "Obiteljska aplikacija", body: "", url: "/tasks" };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch {
+    // If the payload isn't JSON, use the text as the message body.
+    if (event.data) data.body = event.data.text();
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: { url: data.url || "/tasks" },
+    }),
+  );
+});
+
+// Click on a notification — open (or focus) the app at the requested URL.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || "/tasks";
+
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if ("focus" in client) {
+            client.navigate(targetUrl);
+            return client.focus();
+          }
+        }
+        return self.clients.openWindow(targetUrl);
+      }),
+  );
+});

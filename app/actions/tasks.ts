@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFamilyMembers, isValidAssignee } from "@/lib/family";
+import { sendPushToUser } from "@/lib/push";
 import type { ActionResult, Task } from "@/lib/types";
 
 const AUTH_ERROR = "Niste prijavljeni.";
@@ -83,6 +84,17 @@ export const addTask = async (formData: FormData): Promise<ActionResult> => {
     return { ok: false, error: error.message };
   }
 
+  // Notify the assignee — but only if they're not the person who created the task.
+  // sendPushToUser never throws, so the await can't break the action (and the
+  // await is necessary so the Vercel serverless function doesn't exit before the push is sent).
+  if (assignedTo && assignedTo !== user.id) {
+    await sendPushToUser(assignedTo, {
+      title: "Novi zadatak za tebe",
+      body: title,
+      url: "/tasks",
+    });
+  }
+
   revalidatePath("/tasks");
   return { ok: true };
 };
@@ -130,13 +142,24 @@ export const setTaskAssignee = async (
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update({ assigned_to: assignedTo, updated_at: new Date().toISOString() })
-    .eq("id", id);
+    .eq("id", id)
+    .select("title")
+    .single();
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  // Push to the assignee when assigned (unless it's the person doing the assigning).
+  if (assignedTo && assignedTo !== user.id) {
+    await sendPushToUser(assignedTo, {
+      title: "Dodijeljen ti je zadatak",
+      body: updated?.title ?? "",
+      url: "/tasks",
+    });
   }
 
   revalidatePath("/tasks");
