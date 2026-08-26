@@ -3,6 +3,8 @@
 
 # Family App
 
+https://family-app-two-eosin.vercel.app (private/Google allowlist)
+
 A private PWA for shared daily tasks and a shopping list, built for **exactly two users** (me and my wife). No public registration, no onboarding, no settings nobody touches.
 
 The guiding principle for the whole project: **simplicity matters more than feature count.** Every decision below is measured against that.
