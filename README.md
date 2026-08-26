@@ -30,7 +30,7 @@ The guiding principle for the whole project: **simplicity matters more than feat
 | Exactly 2 users, both trusted | No organizations, teams, invite flows, or roles. Data is **not** partitioned per user — only an "assigned to" field. |
 | Solo development, limited time | Managed services instead of self-run infrastructure. Zero DevOps. |
 | Must work on mobile | Mobile-first UI, PWA instead of a native app (no app stores, no second codebase). |
-| Deployment is routine from day one | Vercel + auto-deploy from `main`. Never "we'll deploy at the end". |
+| Deployment is routine from day one | Vercel + auto-deploy from `master`. Never "we'll deploy at the end". |
 | No formal test suite for the MVP | Instead of tests: TypeScript strict, explicit `ActionResult` types, manual testing. Tests come in when the logic grows. |
 
 ### Key decisions and rationale
@@ -69,7 +69,7 @@ Styling stays in the component you're looking at. No second file, no inventing c
 | Push | [`web-push`](https://github.com/web-push-libs/web-push) | `3.6.7` | VAPID signing + payload encryption |
 | Fonts | `next/font` (Geist, Geist Mono) | — | Self-hosted, no layout shift |
 | Lint | ESLint 9 + `eslint-config-next` | — | Flat config (`eslint.config.mjs`) |
-| Hosting | [Vercel](https://vercel.com) | — | Auto-deploy from `main` |
+| Hosting | [Vercel](https://vercel.com) | — | Auto-deploy from `master` |
 | Packages | npm | — | |
 
 **Deliberately *absent*:**
@@ -330,8 +330,8 @@ A feature is done when:
 
 ```bash
 npm install
-cp .env.local.example .env.local   # if present; otherwise create it manually (see below)
-npm run dev                        # http://localhost:3000
+cp .env.example .env.local   # then fill in the values (see the table below)
+npm run dev                  # http://localhost:3000
 ```
 
 ### Environment variables
@@ -372,7 +372,7 @@ Service workers and push require a secure context. `localhost` counts as secure,
 
 ## Deployment
 
-Vercel, auto-deploy from `main`. Every push is a deployment.
+Vercel, auto-deploy from `master`. Every push is a deployment.
 
 For first-time setup:
 
@@ -380,7 +380,7 @@ For first-time setup:
 2. All environment variables from the table above under *Project Settings → Environment Variables*
 3. The Google OAuth redirect URI in the Supabase Auth settings must point at the production domain
 
-**Git workflow:** solo development directly on `main`, small and frequent commits. The rule: **don't push until `npm run build` passes.**
+**Git workflow:** solo development directly on `master`, small and frequent commits. The rule: **don't push until `npm run build` passes.**
 
 ---
 
