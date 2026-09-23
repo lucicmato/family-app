@@ -3,14 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
+import { categorizeItem } from "@/lib/categorizeItem";
+import { categoryIndex } from "@/lib/shoppingCategories";
 import type { ActionResult, ShoppingItem } from "@/lib/types";
 
 const AUTH_ERROR = "Niste prijavljeni.";
 const RETENTION_DAYS = 10;
 
-// Fetch all shopping items: unchecked first, newest first within each
-// group. Before reading, permanently deletes anything checked off more
-// than 10 days ago — this is the only cleanup mechanism (no cron/edge
+// Fetch all shopping items: unchecked first, silently ordered by store
+// department (no headings in the UI), then checked items newest first.
+// Before reading, permanently deletes anything checked off more than 10 days
+// ago — this is the only cleanup mechanism (no cron/edge
 // function), so old purchases disappear the next time someone opens the
 // list rather than on a fixed schedule.
 export const getShoppingItems = async (): Promise<{
@@ -45,7 +48,17 @@ export const getShoppingItems = async (): Promise<{
     return { items: [], error: error.message };
   }
 
-  return { items: (data ?? []) as ShoppingItem[], error: null };
+  // Store-walk order lives in code (SHOPPING_CATEGORIES), not the DB, so it
+  // is applied here. Array.sort is stable, so the DB's newest-first order
+  // survives within each department. Checked items skip the department step:
+  // they're history, and newest-first is what matters there.
+  const items = ((data ?? []) as ShoppingItem[]).sort(
+    (a, b) =>
+      Number(a.done) - Number(b.done) ||
+      (a.done ? 0 : categoryIndex(a.category) - categoryIndex(b.category)),
+  );
+
+  return { items, error: null };
 };
 
 // Add a new item.
@@ -63,11 +76,13 @@ export const addShoppingItem = async (
   }
 
   const noteRaw = String(formData.get("note") ?? "").trim();
+  const category = await categorizeItem(name);
 
   const supabase = await createClient();
   const { error } = await supabase.from("shopping_items").insert({
     name,
     note: noteRaw || null,
+    category,
     created_by: user.id,
   });
 

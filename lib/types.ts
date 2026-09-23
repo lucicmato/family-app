@@ -31,6 +31,9 @@ export type ShoppingItem = {
   id: string;
   name: string;
   note: string | null;
+  // Store department key from lib/shoppingCategories.ts; plain string
+  // because the DB column isn't an enum and may hold a retired key.
+  category: string;
   done: boolean;
   created_by: string | null;
   checked_by: string | null;

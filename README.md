@@ -19,6 +19,7 @@ The guiding principle for the whole project: **simplicity matters more than feat
 - [Data model](#data-model)
 - [Auth](#auth) - Google OAuth + allowlist
 - [PWA and push notifications](#pwa-and-push-notifications)
+- [AI shopping-list grouping](#ai-shopping-list-grouping)
 - [Execution](#execution) - timeline and status
 - [Running locally](#running-locally)
 - [Deployment](#deployment)
@@ -72,6 +73,7 @@ Styling stays in the component you're looking at. No second file, no inventing c
 | Auth | Supabase Auth (Google OAuth) | - | Session in httpOnly cookies |
 | Supabase SDK | `@supabase/ssr` + `@supabase/supabase-js` | `0.12.3` / `2.110.8` | Cookie-aware clients for SSR |
 | Push | [`web-push`](https://github.com/web-push-libs/web-push) | `3.6.7` | VAPID signing + payload encryption |
+| AI | [`@anthropic-ai/sdk`](https://github.com/anthropics/anthropic-sdk-typescript) (Claude Haiku 4.5) | `^0.128.0` | Assigns shopping items to store departments |
 | Fonts | `next/font` (Geist, Geist Mono) | - | Self-hosted, no layout shift |
 | Lint | ESLint 9 + `eslint-config-next` | - | Flat config (`eslint.config.mjs`) |
 | Hosting | [Vercel](https://vercel.com) | - | Auto-deploy from `master` |
@@ -110,6 +112,8 @@ family-app/
 │   ├── types.ts                # ActionResult, Task, ShoppingItem, FamilyMember
 │   ├── push.ts                 # sendPushToUser() - VAPID + web-push
 │   ├── priority.ts             # priority 1/2/3 → label and color
+│   ├── shoppingCategories.ts   # store departments in walking order
+│   ├── categorizeItem.ts       # name cache → Claude Haiku → fallback "other"
 │   └── helperFunctions.ts      # date formatting
 ├── public/sw.js                # Hand-written service worker
 └── proxy.ts                    # Next.js 16 middleware (session refresh + route protection)
@@ -190,7 +194,7 @@ Four tables, all with Row Level Security enabled.
 `id` (= `auth.users.id`), `email`, `user_name`, `created_at`
 
 **`shopping_items`** - shared shopping list
-`id`, `name`, `note?`, `done`, `created_by?`, `checked_by?`, `checked_at?`, `created_at`, `updated_at`
+`id`, `name`, `note?`, `category` (department key, default `'other'`), `done`, `created_by?`, `checked_by?`, `checked_at?`, `created_at`, `updated_at`
 
 **`push_subscriptions`** - one row per **device**, not per user
 `id`, `user_id`, `endpoint` (unique), `p256dh`, `auth`
@@ -293,6 +297,32 @@ Design decisions:
 
 ---
 
+## AI shopping-list grouping
+
+The shopping list is silently ordered by store department (produce → bakery → meat → dairy → … → household), so walking through the store means reading the list top to bottom. The UI shows no headings or category labels. The list looks the same as before, only the order changes. Checked items stay newest first.
+
+**The AI classifies an item once; it never re-sorts the list.** When an item is added, `categorizeItem()` assigns it a department key, which is stored in `shopping_items.category`. Sorting is then plain code: the order of `SHOPPING_CATEGORIES` in `lib/shoppingCategories.ts` *is* the walking order.
+
+```mermaid
+flowchart LR
+    A[addShoppingItem] --> B{same name<br/>seen before?}
+    B -- yes --> C[reuse its category]
+    B -- no --> D[Claude Haiku 4.5<br/>'reply with one key']
+    D -- valid key --> E[category]
+    D -- invalid / error / 3s timeout --> F[other]
+    C & E & F --> G[INSERT]
+```
+
+Design decisions:
+
+- **Classify on write, not on read.** Opening the list never calls the AI, so it stays fast, free, and stable. It can't reshuffle because the model answered differently this time.
+- **Name cache before the model.** Repeat purchases (mlijeko, kruh) are the common case. The previous row with the same name (case-insensitive) supplies the category, so most adds make no API call at all.
+- **Never blocks an add.** A 3 s timeout, no retries, output validated against the known keys; anything unexpected becomes `other`. A missing `ANTHROPIC_API_KEY` just disables the feature.
+- **Smallest model that does the job.** Haiku with `max_tokens: 10`. For two people the cost rounds to zero.
+- **Reordering the store is a one-line change.** Unknown or retired keys sort last rather than breaking the page.
+
+---
+
 ## Execution
 
 Development went incrementally: every step is a self-contained, deployed feature, not a half-finished branch. Timeline from the git history:
@@ -315,6 +345,7 @@ Development went incrementally: every step is a self-contained, deployed feature
 - [x] **PWA** - install to mobile, offline app shell
 - [x] **Shopping list** - a second feature (outside the original roadmap, but the same shape)
 - [x] **Push notifications** - planned for "later", shipped early
+- [x] **AI shopping-list grouping** - items silently ordered by store department (Claude Haiku)
 - [ ] **Real-time sync** - `lib/supabase/client.ts` is prepared, but the Supabase Realtime subscription isn't written yet. Refreshing currently goes through `revalidatePath` after a mutation: the other user's change shows up on navigation, not instantly.
 - [ ] **Categories** (house, groceries, kids…)
 
@@ -351,6 +382,7 @@ Values **never** go into git - locally in `.env.local`, in production in the Ver
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | public | Identifies the server to the push service |
 | `VAPID_PRIVATE_KEY` | **server** | Signs push requests |
 | `SUPABASE_SERVICE_ROLE_KEY` | **server** | Bypasses RLS - see the warning above |
+| `ANTHROPIC_API_KEY` | **server** | Shopping-item categorization; optional - without it new items just sort last |
 
 Next.js inlines **only** variables with the `NEXT_PUBLIC_` prefix into the browser bundle. That prefix is the single thing keeping the `service_role` key out of the client - it isn't cosmetic.
 

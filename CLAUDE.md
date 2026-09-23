@@ -41,6 +41,7 @@ Nazivi (vrijednosti nikad u git — idu u `.env.local` lokalno i u Vercel dashbo
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (samo server, i to tek ako zatreba — nikad izložen klijentu)
+- `ANTHROPIC_API_KEY` (samo server) — AI kategorizacija stavki za kupovinu; bez njega nove stavke idu na kraj popisa
 - `ALLOWED_EMAILS` (samo server) — zarezom odvojena lista dopuštenih Google emailova; provjerava se u `app/auth/callback/route.ts` kao dodatna zaštita uz Supabase dashboard postavku "Allow new users to sign up"
 
 ## Konvencije koda
@@ -87,6 +88,7 @@ Nazivi (vrijednosti nikad u git — idu u `.env.local` lokalno i u Vercel dashbo
 4. PWA (instalacija na mobitel).
 5. Kategorije (kuća, dućan, djeca…).
 6. (Kasnije) push notifikacije za podsjetnike.
+7. AI grupiranje popisa za kupovinu: svaka nova stavka jednom dobije odjel trgovine (Claude Haiku, `lib/categorizeItem.ts`), lista se sortira po redoslijedu iz `lib/shoppingCategories.ts`. Kategorija se nigdje ne prikazuje u UI-ju — samo redoslijed. AI se zove samo pri dodavanju, nikad pri čitanju.
 
 ## Naredbe (potvrditi nakon inicijalizacije)
 - Dev: `npm run dev`
