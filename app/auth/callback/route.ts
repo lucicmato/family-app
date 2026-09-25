@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { safeNextPath } from "@/lib/safeNextPath";
 import { createClient } from "@/lib/supabase/server";
 
 // Defense in depth alongside the Supabase-dashboard signup restriction: even
@@ -12,7 +13,7 @@ const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS ?? "")
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  const next = safeNextPath(searchParams.get("next"), origin);
 
   if (code) {
     const supabase = await createClient();
