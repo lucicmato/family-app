@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { categorizeItem } from "@/lib/categorizeItem";
+import { INPUT_LIMITS } from "@/lib/inputLimits";
 import { categoryIndex } from "@/lib/shoppingCategories";
 import type { ActionResult, ShoppingItem } from "@/lib/types";
 
@@ -75,7 +76,16 @@ export const addShoppingItem = async (
     return { ok: false, error: "Naziv artikla je obavezan." };
   }
 
+  if (name.length > INPUT_LIMITS.shoppingName) {
+    return { ok: false, error: `Naziv može imati najviše ${INPUT_LIMITS.shoppingName} znakova.` };
+  }
+
   const noteRaw = String(formData.get("note") ?? "").trim();
+  if (noteRaw.length > INPUT_LIMITS.shoppingNote) {
+    return { ok: false, error: `Napomena može imati najviše ${INPUT_LIMITS.shoppingNote} znakova.` };
+  }
+
+  // Only after validation: this may call the paid Anthropic API.
   const category = await categorizeItem(name);
 
   const supabase = await createClient();

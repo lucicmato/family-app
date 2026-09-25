@@ -10,6 +10,7 @@ import {
   PRIORITY_LABELS,
 } from "@/lib/priority";
 import { todayIso } from "@/lib/helperFunctions";
+import { INPUT_LIMITS } from "@/lib/inputLimits";
 
 // Quick task adding: one input + button. Minimal number of clicks.
 export const AddTaskForm = ({
@@ -51,6 +52,7 @@ export const AddTaskForm = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Novi zadatak…"
+          maxLength={INPUT_LIMITS.taskTitle}
           autoComplete="off"
           className="flex-1 rounded-lg border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
         />

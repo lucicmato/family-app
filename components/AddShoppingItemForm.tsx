@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { addShoppingItem } from "@/app/actions/shopping";
+import { INPUT_LIMITS } from "@/lib/inputLimits";
 
 // Quick item adding: name + optional note, one submit. Minimal number of clicks.
 export const AddShoppingItemForm = () => {
@@ -35,6 +36,7 @@ export const AddShoppingItemForm = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nova stavka…"
+          maxLength={INPUT_LIMITS.shoppingName}
           autoComplete="off"
           className="flex-1 rounded-lg border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
         />
@@ -51,6 +53,7 @@ export const AddShoppingItemForm = () => {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="Napomena (npr. x2, light) — opcionalno"
+        maxLength={INPUT_LIMITS.shoppingNote}
         autoComplete="off"
         className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm outline-none focus:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
       />

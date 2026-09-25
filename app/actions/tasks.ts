@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getFamilyMembers, isValidAssignee } from "@/lib/family";
+import { INPUT_LIMITS } from "@/lib/inputLimits";
 import { sendPushToUser } from "@/lib/push";
 import type { ActionResult, Task } from "@/lib/types";
 
@@ -56,6 +57,9 @@ export const addTask = async (formData: FormData): Promise<ActionResult> => {
   const title = String(formData.get("title") ?? "").trim();
   if (!title) {
     return { ok: false, error: "Ime taska je obavezan podatak." };
+  }
+  if (title.length > INPUT_LIMITS.taskTitle) {
+    return { ok: false, error: `Ime taska može imati najviše ${INPUT_LIMITS.taskTitle} znakova.` };
   }
 
   const dueDateRaw = String(formData.get("due_date") ?? "").trim();
