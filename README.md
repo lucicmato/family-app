@@ -214,10 +214,13 @@ Defined in `getTasks()` (`app/actions/tasks.ts:36`) - all in a single query, no 
 
 ## Auth
 
-Passwordless Google OAuth, with **two independent layers** of access restriction:
+Passwordless Google OAuth. The anon key and project URL ship in the browser bundle, so anyone can talk to Supabase Auth and PostgREST directly, without going through this app. Access control therefore lives **in the database**, with the app-level check on top:
 
-1. Supabase dashboard: *Allow new users to sign up* = **off**
-2. `ALLOWED_EMAILS` check in `app/auth/callback/route.ts` - defense in depth, so a lapse in the first layer doesn't open the app
+1. **RLS gate** - a restrictive `family_only` policy (command `ALL`, roles `anon` + `authenticated`) on every table: `(select auth.uid()) in ('<uuid-1>'::uuid, '<uuid-2>'::uuid)`. Restrictive policies are ANDed with the permissive ones, so even a valid JWT for any other account reads and writes nothing. The two user ids are set in the dashboard only, never in the repo.
+2. Supabase dashboard: *Allow new users to sign up* = **off**, Email provider **off**.
+3. `ALLOWED_EMAILS` check in `app/auth/callback/route.ts` - only guards the app's own login flow; it exists to show a friendly `not_allowed` error, not to protect data.
+
+A new table gets the same `family_only` policy, or it is open to every Supabase account.
 
 ```mermaid
 sequenceDiagram

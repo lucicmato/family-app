@@ -42,7 +42,7 @@ Nazivi (vrijednosti nikad u git — idu u `.env.local` lokalno i u Vercel dashbo
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (samo server, i to tek ako zatreba — nikad izložen klijentu)
 - `ANTHROPIC_API_KEY` (samo server) — AI kategorizacija stavki za kupovinu; bez njega nove stavke idu na kraj popisa
-- `ALLOWED_EMAILS` (samo server) — zarezom odvojena lista dopuštenih Google emailova; provjerava se u `app/auth/callback/route.ts` kao dodatna zaštita uz Supabase dashboard postavku "Allow new users to sign up"
+- `ALLOWED_EMAILS` (samo server) — zarezom odvojena lista dopuštenih Google emailova; provjerava se u `app/auth/callback/route.ts` samo radi UX-a (poruka `not_allowed`). Stvarna zaštita je u bazi: restriktivna RLS politika `family_only` koja propušta samo naša dva user ID-a (postavljeno ručno u Supabase dashboardu).
 
 ## Konvencije koda
 - TypeScript strict; izbjegavati `any`.
@@ -62,7 +62,7 @@ Nazivi (vrijednosti nikad u git — idu u `.env.local` lokalno i u Vercel dashbo
 ## Sigurnost
 - Row Level Security uključen na svim tablicama.
 - Na klijentu se koristi samo `anon` ključ; `service_role` ostaje na serveru.
-- Pristup podacima imaju samo prijavljena dva korisnika.
+- Pristup podacima imaju samo prijavljena dva korisnika — i to se provodi u bazi (restriktivna `family_only` politika na svakoj tablici), ne samo u Next.js-u. Nova tablica mora dobiti istu politiku.
 
 ## Definicija gotovog
 - `npm run build` i `npm run lint` prolaze bez grešaka.
